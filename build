@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+mkdir -p dist
+echo "build lib/signimg.ls -> dist/signimg.js ..."
+./node_modules/.bin/lsc -cbp lib/signimg.ls > dist/signimg.js
+
+echo "minifying signimg.js ..."
+./node_modules/.bin/uglifyjs dist/signimg.js > dist/signimg.min.js
+
+echo "done."
+

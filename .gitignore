@@ -1,0 +1,6 @@
+*.pem
+secret.*
+*.log
+.*.swp
+node_modules
+work

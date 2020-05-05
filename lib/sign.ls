@@ -1,5 +1,5 @@
 require! <[fs crypto]>
-inject = require "./inject"
+{inject, parse} = require "./file"
 
 sign-info = (msg, pvk) -> new Promise (res, rej) ->
   try
@@ -23,13 +23,18 @@ sign-file = (img, msg, pvk) ->
 verify-file = (img, msg, pbk) ->
   #sig2 = Buffer.from(JSON.parse(sig).sig, \hex)
   #verify-result = verify comment, sig2, pbk
-verify-info = (msg, sig, pbk) ->
+verify-info = (msg, sig, pbk) -> new Promise (res, rej) ->
+  sig := Buffer.from((if typeof(sig) == \string => JSON.parse(sig) else sig).sig, \hex)
+  msg := if typeof(msg) == \string => msg else JSON.stringify(msg)
+  res( verify msg, sig, pbk )
+
 
 sign = (msg, pvk) ->
   sign = crypto.createSign \RSA-SHA512
   sign.update msg
   sig = sign.sign pvk
   return JSON.stringify({sig: sig.toString(\hex)})
+
 verify = (msg, sig, pbk) ->
   verify = crypto.createVerify \RSA-SHA512
   verify.update(msg)

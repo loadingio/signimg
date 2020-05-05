@@ -5,10 +5,12 @@ echo "build lib/sign.ls -> dist/sign.js ..."
 echo "minifying sign.js ..."
 ./node_modules/.bin/uglifyjs dist/sign.js > dist/sign.min.js
 
-echo "build lib/inject.ls -> dist/inject.js ..."
-./node_modules/.bin/lsc -cbp lib/inject.ls > dist/inject.js
-echo "minifying inject.js ..."
-./node_modules/.bin/uglifyjs dist/inject.js > dist/inject.min.js
+echo "build lib/file.ls -> dist/file.js ..."
+./node_modules/.bin/lsc -cbp lib/file.ls > dist/file.js
+echo "minifying file.js ..."
+./node_modules/.bin/uglifyjs dist/file.js > dist/file.min.js
 
+mkdir -p web/static/assets/lib/signimg
+cp -R dist/* web/static/assets/lib/signimg/
 echo "done."
 

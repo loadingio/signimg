@@ -1,0 +1,66 @@
+doctype html
+include /../../static/assets/lib/ldui/pug/ldui.pug
+html
+  head
+    +css("/assets/lib/bootstrap/4.3.1/bootstrap.min.css")
+    +css("/assets/lib/ldui/ldui.min.css")
+    style(type="text/css"): :stylus
+      html, body { width: 100%; height: 100%; margin: 0; padding: 0 }
+  body
+    .w-1024.mx-auto.rwd.typeset.heading-contrast
+      .text-center.py-4
+        h1 signimg
+        p inject signed information about user, createdtime and license, etc.
+      .my-4.py-4.rounded.border.shadow-sm: .row.my-4
+        .col-md.text-center
+          label Original Image
+          img#img1.d-block.mx-auto(src="/assets/img/spinner.png")
+          a#link1.d-block.mx-auto(href="/assets/img/spinner.png",download="spinner.png") Download
+        .col-md.text-center
+          label Signed Image
+          img#img2.d-block.mx-auto(src="/assets/img/spinner.png")
+          a#link2.d-block.mx-auto(download="signed-spinner.png") Download
+        .col-md.text-center: .vertical-center: .w-100
+          label Verify
+          .mx-auto(style="width:200px"): .aspect-ratio.ratio-1by1: .vertical-center
+            #verifyResult.w-100.text-center(style="word-break:break-all")
+          .btn.btn-upload.btn-outline-dark.d-block.mx-4 Upload #[input(type="file")]
+    +script("https://bundle.run/buffer@5.6.0")
+    +script("https://cdnjs.cloudflare.com/ajax/libs/crc-32/1.2.0/crc32.min.js")
+    +script("https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.14.0/js/md5.min.js")
+    +script("/assets/lib/ldui/ldui.min.js")
+    +script("/assets/lib/signimg/file.min.js")
+    script: :lsc
+      Buffer = buffer.Buffer
+      lc = {}
+      ldFile.fromURL "/assets/img/spinner.png"
+        .then -> it.file.arrayBuffer!
+        .then -> Buffer.from(it)
+        .then ->
+          lc.img = it
+          payload = {md5: md5(it)}
+          ld$.fetch '/d/sign', {method: \POST}, {json: payload, type: \json}
+        .then -> signimg.inject lc.img, it.msg, it.sig
+        .then -> URL.createObjectURL(new Blob([it]))
+        .then ->
+          link2.setAttribute \href, it
+          link2.setAttribute \download, \out.png
+          img2.setAttribute \src, it
+      ldf = new ldFile root: 'input', type: \arraybuffer
+      ldf.on \load, ->
+        lc.img = Buffer.from(it.0.result)
+        signimg.parse lc.img
+          .then (data) ->
+            lc.data = data
+            ld$.fetch '/d/verify', {method: \POST}, {json: data, type: \json}
+          .then ->
+            verifyResult.innerHTML = (
+              """
+              <div class="mb-4 text-#{if it=>'success' else 'danger'}">
+                following message are <br>#{(if it => "" else "not")} correctly signed:
+              </div>
+              <div class="text-muted text-sm">
+              #{JSON.stringify((lc.data.msg or ''))}
+              </div>
+              """
+            )

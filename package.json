@@ -15,12 +15,15 @@
     "npm": ">=1.2.2"
   },
   "scripts": {
-    "start": "cd web; ../node_modules/.bin/lsc ../node_modules/template/server.ls",
+    "start": "cd web; ../node_modules/.bin/lsc server.ls",
     "init": "./init.sh"
   },
   "devDependencies": {
     "LiveScript": ">=1.2.0",
-    "uglify-js": "=3.2.0",
-    "template": "github:zbryikt/template#v2"
+    "body-parser": "^1.19.0",
+    "colors": "^1.4.0",
+    "express": "^4.17.1",
+    "template": "github:zbryikt/template#v2",
+    "uglify-js": "=3.2.0"
   }
 }

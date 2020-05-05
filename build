@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 mkdir -p dist
-echo "build lib/signimg.ls -> dist/signimg.js ..."
-./node_modules/.bin/lsc -cbp lib/signimg.ls > dist/signimg.js
+echo "build lib/sign.ls -> dist/sign.js ..."
+./node_modules/.bin/lsc -cbp lib/sign.ls > dist/sign.js
+echo "minifying sign.js ..."
+./node_modules/.bin/uglifyjs dist/sign.js > dist/sign.min.js
 
-echo "minifying signimg.js ..."
-./node_modules/.bin/uglifyjs dist/signimg.js > dist/signimg.min.js
+echo "build lib/inject.ls -> dist/inject.js ..."
+./node_modules/.bin/lsc -cbp lib/inject.ls > dist/inject.js
+echo "minifying inject.js ..."
+./node_modules/.bin/uglifyjs dist/inject.js > dist/inject.min.js
 
 echo "done."
 

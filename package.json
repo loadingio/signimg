@@ -2,7 +2,7 @@
   "author": "zbryikt",
   "name": "signimg",
   "license": "MIT",
-  "main": "dist/signimg.js",
+  "main": "dist/sign.js",
   "description": "Sign image with provided keys and message",
   "version": "0.0.1",
   "homepage": "https://github.com/loadingio/signimg",

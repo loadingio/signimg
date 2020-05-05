@@ -1,38 +1,18 @@
-require! <[fs crypto]>
-crc32 = require "crc-32"
+if module? => crc32 = require "crc-32"
 
-sign-file = (img, msg, pvk) -> new Promise (res, rej) ->
-  try
-    if typeof(msg) == \string => msg := {} <<< {msg}
-    msg.md5 = crypto.createHash \md5 .update img .digest \hex
-    # TODO accurately check file format
-    type = if img.0 == 0x47 => \gif else \png
-    msg := JSON.stringify(msg)
-    sig = sign(msg, pvk)
-    if type == \gif =>
-      buf = Buffer.concat [make-gif-block(msg, false), make-gif-block(sig, true)]
-      return res(inject-gif-block img, buf)
-    else if type == \png =>
-      buf = Buffer.concat [make-png-block(msg, false), make-png-block(sig, true)]
-      return res(inject-png-block img, buf)
-    else throw new Error("unsupported file format")
-  catch e
-    return rej(e)
-
-#TODO implement this
-verify-file = (img, msg, pbk) ->
-  #sig2 = Buffer.from(JSON.parse(sig).sig, \hex)
-  #verify-result = verify comment, sig2, pbk
-
-sign = (msg, pvk) ->
-  sign = crypto.createSign \RSA-SHA512
-  sign.update msg
-  sig = sign.sign pvk
-  return JSON.stringify({sig: sig.toString(\hex)})
-verify = (msg, sig, pbk) ->
-  verify = crypto.createVerify \RSA-SHA512
-  verify.update(msg)
-  verified = verify.verify pbk, sig
+inject = (img, msg, sig) -> new Promise (res, rej) ->
+  if typeof(msg) != \string => msg := JSON.stringify(msg)
+  if typeof(sig) != \string => sig := JSON.stringify(sig)
+  type = if [0x47 0x49 0x46 0x38].map((d,i) -> img[i] == d).reduce(((a,b) -> a and b),true) => \gif
+  else if [0x89 0x50 0x4e 0x47].map((d,i) -> img[i] == d).reduce(((a,b) -> a and b),true) => \png
+  else \unknown
+  if type == \gif =>
+    buf = Buffer.concat [make-gif-block(msg, false), make-gif-block(sig, true)]
+    return res(inject-gif-block img, buf)
+  else if type == \png =>
+    buf = Buffer.concat [make-png-block(msg, false), make-png-block(sig, true)]
+    return res(inject-png-block img, buf)
+  else return Promise.reject(new Error("unsupported file format"))
 
 make-png-block = (input, is-sig = false) ->
   if typeof(input) == \string => input = Buffer.from(input)
@@ -46,7 +26,6 @@ make-png-block = (input, is-sig = false) ->
 
 make-gif-block = (input, is-sig = false) ->
   if typeof(input) == \string => input = Buffer.from(input)
-
   #src = Buffer.alloc(input.length + 6)
   # LDIO
   #[0x4c 0x44 0x49 0x4f, (if is-sig => 0x53 else 0x43)].map (d,i) -> src[i] = d
@@ -88,4 +67,5 @@ inject-png-block = (png, buf) ->
   png.copy out, offset + buf.length, offset
   return out
 
-module.exports = {sign: sign-file, verify: verify-file}
+if module? => module.exports = inject
+if window? => window.signimg = {inject}

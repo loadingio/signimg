@@ -20,9 +20,9 @@
   },
   "devDependencies": {
     "LiveScript": ">=1.2.0",
-    "body-parser": "^1.19.0",
+    "body-parser": "^1.20.1",
     "colors": "^1.4.0",
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "template": "github:zbryikt/template#v2",
     "uglify-js": "=3.2.0"
   }
